@@ -9,14 +9,13 @@ STOCKS = {
         'GOOGL', # Alphabet Inc. (Class A)
         'GOOG',  # Alphabet Inc. (Class C)
         'AMZN',  # Amazon.com, Inc.
-        'FB',    # Meta Platforms, Inc. (formerly Facebook)
+        'META',    # Meta Platforms, Inc. (formerly Facebook)
         'NVDA',  # NVIDIA Corporation
         'TSLA',  # Tesla, Inc.
         'INTC',  # Intel Corporation
         'CSCO',  # Cisco Systems, Inc.
         'ORCL',  # Oracle Corporation
         'IBM',   # International Business Machines Corporation
-        'SAP',   # SAP SE
         'ADBE',  # Adobe Inc.
         'AVGO',  # Broadcom Inc.
         'TXN',   # Texas Instruments Incorporated
