@@ -3,4 +3,3 @@ yfinance
 matplotlib
 python-dotenv
 pandas
-__pycache__/
