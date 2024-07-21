@@ -292,3 +292,11 @@ STOCK_EVAL_FUNCTIONS = {
     'Dividend Yield': lambda stock, industry: "Beats average" if stock > industry else "Lags average",
     'EPS': lambda stock, industry: "Beats average" if stock > industry else "Lags average"
 }
+
+ETF_EVAL_FUNCTIONS = {
+    'Dividend Yield': lambda div: 'High' if div > 3 else ('Low' if div < 1.5 else 'Average'),
+    'Beta': lambda beta: 'High' if beta > 1.1 else ('Low' if beta < 1 else 'Average'),
+    'Yearly Return': lambda ret: 'High' if ret > 10 else ('Low' if ret < 7 else 'Average'),
+    '3-Year Average Return': lambda ret: 'High' if ret > 8 else ('Low' if ret < 5 else 'Average'),
+    '5-Year Average Return': lambda ret: 'High' if ret > 12 else ('Low' if ret < 8 else 'Average')
+}
