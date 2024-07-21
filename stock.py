@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 import os
 import requests
 import pandas as pd
+from utils import get_stock_data, get_industry_averages
+from constants import STOCK_EVAL_FUNCTIONS
 
 load_dotenv()
 
@@ -57,14 +59,26 @@ def income(tckr):
 
 @click.command()
 @click.option('--tckr', help='The ticker symbol of the stock.')
-def key_metrics(tckr):
+def metrics(tckr):
     """
     Fetch and display key fundamental metrics along with industry benchmark.
     """
+    metrics = get_stock_data(tckr)
+    sector = yf.Ticker(tckr).info.get('sector')
+    benchmark_metrics = get_industry_averages(sector)
+    click.echo(f'{tckr.upper()} key fundamental metrics:')
+    click.echo('----------------------------------------------')
 
+    for key, value in metrics.items():
+        if value is None:
+            continue
+
+        perf = STOCK_EVAL_FUNCTIONS[key](value, benchmark_metrics[key])
+        click.echo(f'{key}: {value} (Industry Avg: {benchmark_metrics[key]}) - {perf}')
 
 # add to group
 cli.add_command(income)
+cli.add_command(metrics)
 
 if __name__ == '__main__':
     cli()

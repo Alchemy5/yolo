@@ -279,3 +279,16 @@ STOCKS = {
         'CLX',   # The Clorox Company (utilities-related services)
     ]
 }
+
+STOCK_EVAL_FUNCTIONS = {
+    'P/E Ratio': lambda stock, industry: "Undervalued" if stock < industry else "Overvalued",
+    'PEG Ratio': lambda stock, industry: "Undervalued" if stock < industry else "Overvalued",
+    'Net Profit Margin': lambda stock, industry: "Beats average" if stock > industry else "Lags average",
+    'ROE': lambda stock, industry: "Beats average" if stock > industry else "Lags average",
+    'ROA': lambda stock, industry: "Beats average" if stock > industry else "Lags average",
+    'Debt to Equity Ratio': lambda stock, industry: "Beats average" if stock < industry else "Lags average",
+    'Current Ratio': lambda stock, industry: "Beats average" if stock > industry else "Lags average",
+    'Quick Ratio': lambda stock, industry: "Beats average" if stock > industry else "Lags average",
+    'Dividend Yield': lambda stock, industry: "Beats average" if stock > industry else "Lags average",
+    'EPS': lambda stock, industry: "Beats average" if stock > industry else "Lags average"
+}
