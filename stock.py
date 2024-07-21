@@ -76,9 +76,21 @@ def metrics(tckr):
         perf = STOCK_EVAL_FUNCTIONS[key](value, benchmark_metrics[key])
         click.echo(f'{key}: {value} (Industry Avg: {benchmark_metrics[key]}) - {perf}')
 
+@click.command
+@click.option('--tckr', help='The ticker symbol of the stock.')
+def summary(tckr):
+    """
+    Fetch and display summary of company.
+    """
+    summary = yf.Ticker(tckr).info
+    click.echo(f'{tckr.upper()} summary:')
+    click.echo('----------------------------------------------')
+    click.echo(f'Description: {summary.get("longBusinessSummary")}')
+
 # add to group
 cli.add_command(income)
 cli.add_command(metrics)
+cli.add_command(summary)
 
 if __name__ == '__main__':
     cli()

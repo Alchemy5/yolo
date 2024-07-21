@@ -277,7 +277,60 @@ STOCKS = {
         'HST',   # Host Hotels & Resorts, Inc. (utilities-related REIT)
         'BXP',   # Boston Properties, Inc. (utilities-related REIT)
         'CLX',   # The Clorox Company (utilities-related services)
-    ]
+    ],
+    
+    "Consumer Defensive": [
+        "PG",  # Procter & Gamble
+        "KO",  # Coca-Cola
+        "PEP",  # PepsiCo
+        "UL",  # Unilever
+        "NSRGY",  # Nestlé
+        "CL",  # Colgate-Palmolive
+        "MDLZ",  # Mondelez International
+        "KDP",  # Keurig Dr Pepper
+        "JNJ",  # Johnson & Johnson
+        "KMB",  # Kimberly-Clark
+        "RBGLY",  # Reckitt Benckiser
+        "GIS",  # General Mills
+        "WBA",  # Walgreens Boots Alliance
+        "CLX",  # Clorox
+        "KHC",  # Heinz
+        "MO",  # Altria Group
+        "PM",  # Philip Morris International
+        "DEO",  # Diageo
+        "LRLCF",  # L'Oréal
+        "KHC",  # The Kraft Heinz Company
+        "COST",  # Costco Wholesale
+        "WMT",  # Walmart
+        "TGT",  # Target
+        "CVS",  # CVS Health
+        "DG",  # Dollar General
+        "DLTR",  # Dollar Tree
+        "LOW",  # Lowe's Companies
+        "HD",  # Home Depot
+        "ADRNY",  # Ahold Delhaize
+        "PEET",  # Peet's Coffee
+        "HSY",  # Hershey
+        "CPB",  # Campbell Soup Company
+        "PGH",  # P&G Health
+        "MTTRY",  # Metro AG
+        "SBMRY",  # SABMiller
+        "BUD",  # Anheuser-Busch InBev
+        "DANOY",  # Danone
+        "BUD",  # AB InBev
+        "TAP",  # Molson Coors Beverage Company
+        "SJM",  # J.M. Smucker Company
+        "RHUHF",  # Richelieu Hardware
+        "SYY",  # Sysco Corporation
+        "BNZLY",  # Bunzl PLC
+        "GO",  # Grocery Outlet
+        "K",  # Kellogg Company
+        "HSY",  # The Hershey Company
+        "LVMUY",  # LVMH Moët Hennessy Louis Vuitton
+        "EL",  # Estée Lauder Companies
+        "CAG",  # Conagra Brands
+        "BTVCF"  # Britvic PLC
+    ],
 }
 
 STOCK_EVAL_FUNCTIONS = {
