@@ -1,0 +1,5 @@
+click
+yfinance
+matplotlib
+python-dotenv
+pandas
