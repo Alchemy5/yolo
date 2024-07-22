@@ -2,6 +2,12 @@ import os
 import json
 from constants import STOCKS
 import yfinance as yf
+import numpy as np
+from lxml import html
+import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def get_stock_data(ticker):
     """
@@ -17,7 +23,7 @@ def get_stock_data(ticker):
         'Net Profit Margin': info.get('profitMargins') * 100 if info.get('profitMargins') else None,
         'ROE': (info.get('returnOnEquity') * 100) if info.get('returnOnEquity') else None,
         'ROA': (info.get('returnOnAssets') * 100) if info.get('returnOnAssets') else None,
-        'Debt to Equity Ratio': info.get('debtToEquity'),
+        'Debt to Equity Ratio': info.get('debtToEquity')/100 if info.get('debtToEquity') else None,
         'Current Ratio': info.get('currentRatio'),
         'Quick Ratio': info.get('quickRatio'),
         'Dividend Yield': round(info.get('dividendYield') * 100, 2) if info.get('dividendYield') else None,
@@ -68,3 +74,76 @@ def get_industry_averages(sector):
         json.dump(metrics_avg, f)
     
     return metrics_avg
+
+def get_growth_rate(tckr):
+    """
+    Given ticker calculate average growth rate in revenue.
+    """
+    url = f'https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol={tckr}&apikey={os.getenv("ALPHA_VANTAGE_API_KEY")}'
+    
+    data = requests.get(url).json()
+    revenues = {}
+    annual_reports = data.get('annualReports', [])
+    for report in annual_reports:
+        fiscal_date_ending = report.get('fiscalDateEnding')
+        total_revenue = report.get('totalRevenue')
+        revenues[fiscal_date_ending] = int(total_revenue)
+    
+    revenues = list(revenues.values())[::-1]
+    growth_rates = []
+    
+    for i in range(1, len(revenues)):
+        growth_rate = ((revenues[i] / revenues[i-1]) - 1) * 100
+        growth_rates.append(growth_rate)
+    
+    return sum(growth_rates) / len(growth_rates)
+
+def get_discount_rate(tckr):
+    """
+    WACC calculation.
+    """
+    stock = yf.Ticker(tckr)
+    beta = stock.info.get('beta', None)
+    equity_value = stock.info.get('marketCap', None)
+
+    balance_sheet = stock.balance_sheet
+    long_term_debt = balance_sheet.loc['Long Term Debt'].iloc[0]
+    debt_value = long_term_debt
+
+    if not beta:
+        raise Exception('Beta not available for this stock.')
+
+    risk_free_rate = 4.242/100
+    market_risk_premium = 5/100
+    cost_of_debt = 4/100
+
+    cost_of_equity = risk_free_rate + beta * market_risk_premium
+
+    total_value = equity_value + debt_value
+    weight_equity = equity_value / total_value
+    weight_debt = debt_value / total_value
+
+    wacc = (weight_equity * cost_of_equity) + (weight_debt * cost_of_debt * (1 - 21/100)) # corporate tax rate is 21%
+
+    return wacc * 100  # Convert back to percentage
+
+def get_free_cash_flow(ticker):
+    stock = yf.Ticker(ticker)
+    cash_flow = stock.cashflow
+    if 'Free Cash Flow' in cash_flow.index:
+        free_cash_flow = cash_flow.loc['Free Cash Flow'].iloc[0]
+        return free_cash_flow
+    else:
+        raise Exception('Free Cash Flow data not available for this stock.')
+    
+def estimate_terminal_growth_rate(economic_growth_rate=0.03, inflation_rate=0.02):
+    """
+    Estimate the terminal growth rate based on economic and inflation rates.
+
+    :param economic_growth_rate: Long-term economic growth rate (as a decimal, e.g., 0.03 for 3%)
+    :param inflation_rate: Long-term inflation rate (as a decimal, e.g., 0.02 for 2%)
+
+    :return: Estimated terminal growth rate
+    """
+    # A conservative approach might use a rate close to the economic growth rate or slightly below it.
+    return min(economic_growth_rate, inflation_rate + 0.01)  # Adding a small buffer above inflation

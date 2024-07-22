@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 import os
 import requests
 import pandas as pd
-from utils import get_stock_data, get_industry_averages
+from utils import get_stock_data, get_industry_averages, get_discount_rate, get_growth_rate, get_free_cash_flow \
+    , estimate_terminal_growth_rate
 from constants import STOCK_EVAL_FUNCTIONS
 
 load_dotenv()
@@ -87,10 +88,48 @@ def summary(tckr):
     click.echo('----------------------------------------------')
     click.echo(f'Description: {summary.get("longBusinessSummary")}')
 
+@click.command()
+@click.option('--tckr', help='The ticker symbol of the stock.')
+def value(tckr):
+    """
+    Calculate intrinsic value for a stock based on dcf analysis.
+    """
+    def calculate_present_value_of_cash_flows(free_cash_flow, growth_rate, discount_rate, years):
+        present_value = 0
+        for year in range(1, years + 1):
+            cash_flow = free_cash_flow * (1 + growth_rate) ** year
+            present_value += cash_flow / (1 + discount_rate) ** year
+        return present_value
+
+    def calculate_terminal_value(free_cash_flow, growth_rate, discount_rate):
+        terminal_value = free_cash_flow * (1 + growth_rate) / (discount_rate - growth_rate)
+        return terminal_value
+
+    growth_rate = get_growth_rate(tckr)/100
+    discount_rate = get_discount_rate(tckr)/100
+    free_cash_flow = get_free_cash_flow(tckr)
+    terminal_growth_rate = estimate_terminal_growth_rate()
+    years = 10
+    
+    # Calculate present value of cash flows for the first 10 years
+    present_value_of_cash_flows = calculate_present_value_of_cash_flows(free_cash_flow, growth_rate, discount_rate, years)
+    
+    # Calculate terminal value and present value of the terminal value
+    terminal_value = calculate_terminal_value(free_cash_flow * (1 + growth_rate) ** years, terminal_growth_rate, discount_rate)
+    present_value_of_terminal_value = terminal_value / (1 + discount_rate) ** years
+
+    # Total intrinsic value
+    intrinsic_value = present_value_of_cash_flows + present_value_of_terminal_value
+
+    click.echo(f'Intrinsic value of {tckr} is: ${intrinsic_value:.2f} billion')
+    number_of_shares = yf.Ticker(tckr).info['sharesOutstanding']
+    click.echo(f'Intrinsic value per share: ${intrinsic_value / number_of_shares:.2f}')
+
 # add to group
 cli.add_command(income)
 cli.add_command(metrics)
 cli.add_command(summary)
+cli.add_command(value)
 
 if __name__ == '__main__':
     cli()
