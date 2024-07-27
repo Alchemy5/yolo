@@ -142,3 +142,23 @@ def estimate_terminal_growth_rate(growth_rate):
     """
     # A conservative approach might use a rate close to the economic growth rate or slightly below it.
     return growth_rate / 2
+
+def get_dividend_growth_rate(tckr):
+    """
+    Given ticker calculate average growth rate in revenue.
+    """
+    ticker = yf.Ticker(tckr)
+                       
+    dividend_history = ticker.dividends
+    
+    dividend_dict = dividend_history.to_dict()
+
+    dividends = list(dividend_dict.values())
+    dividends = dividends[len(dividends)-20:]
+    growth_rates = []
+    
+    for i in range(1, len(dividends)):
+        growth_rate = ((dividends[i] / dividends[i-1]) - 1) * 100
+        growth_rates.append(growth_rate)
+    
+    return sum(growth_rates) / len(growth_rates)

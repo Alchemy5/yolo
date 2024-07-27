@@ -6,7 +6,7 @@ import os
 import requests
 import pandas as pd
 from utils import get_stock_data, get_industry_averages, get_discount_rate, get_growth_rate, get_free_cash_flow \
-    , estimate_terminal_growth_rate
+    , estimate_terminal_growth_rate, get_dividend_growth_rate
 from constants import STOCK_EVAL_FUNCTIONS
 
 load_dotenv()
@@ -104,7 +104,7 @@ def dcf(tckr):
     click.echo(f'Discount rate: {discount_rate}')
     click.echo(f'Free cash flow: {free_cash_flow}')
     click.echo(f'Terminal growth rate: {terminal_growth_rate}')
-    
+
     cash_flows = []
     discounted_cash_flows = []
 
@@ -126,12 +126,43 @@ def dcf(tckr):
     number_of_shares = yf.Ticker(tckr).info['sharesOutstanding']
     click.echo(f'Number of shares: {number_of_shares}')
     click.echo(f'Intrinsic value per share: ${intrinsic_value / number_of_shares:.2f}')
+    click.echo(f'Current price: ${yf.Ticker(tckr).info["currentPrice"]}')
+
+@click.command()
+@click.option('--tckr', help='The ticker symbol of the stock.')
+def ddm(tckr):
+    """
+    Calculate intrinsic value for a stock based on dividend discount model.
+    """
+    # Fetch stock data
+    stock = yf.Ticker(tckr)
+    
+    # Retrieve dividend data
+    info = stock.info
+    dividend_yield = info.get('dividendYield', None)
+    if dividend_yield is None:
+        raise ValueError("This stock does not pay dividends.")
+
+    click.echo(f'Dividend yield: {dividend_yield}')
+    current_price = info.get('currentPrice', None)
+    if current_price is None:
+        raise ValueError("Current stock price data is not available for this stock.")
+    dividend = dividend_yield * current_price
+
+    discount_rate = get_discount_rate(tckr)/100
+    stock_price = dividend / (discount_rate - get_dividend_growth_rate(tckr)/100)
+
+    click.echo(f'Intrinsic value of {tckr} is: ${stock_price:.2f}')
+    click.echo(f'Current price: ${current_price}')
+    return stock_price
+    
 
 # add to group
 cli.add_command(income)
 cli.add_command(metrics)
 cli.add_command(summary)
 cli.add_command(dcf)
+cli.add_command(ddm)
 
 if __name__ == '__main__':
     cli()
