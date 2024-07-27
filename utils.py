@@ -90,6 +90,7 @@ def get_growth_rate(tckr):
         revenues[fiscal_date_ending] = int(total_revenue)
     
     revenues = list(revenues.values())[::-1]
+    revenues = revenues[len(revenues)-10:] # past 10 years
     growth_rates = []
     
     for i in range(1, len(revenues)):
@@ -136,14 +137,8 @@ def get_free_cash_flow(ticker):
     else:
         raise Exception('Free Cash Flow data not available for this stock.')
     
-def estimate_terminal_growth_rate(economic_growth_rate=0.03, inflation_rate=0.02):
+def estimate_terminal_growth_rate(growth_rate):
     """
-    Estimate the terminal growth rate based on economic and inflation rates.
-
-    :param economic_growth_rate: Long-term economic growth rate (as a decimal, e.g., 0.03 for 3%)
-    :param inflation_rate: Long-term inflation rate (as a decimal, e.g., 0.02 for 2%)
-
-    :return: Estimated terminal growth rate
     """
     # A conservative approach might use a rate close to the economic growth rate or slightly below it.
-    return min(economic_growth_rate, inflation_rate + 0.01)  # Adding a small buffer above inflation
+    return growth_rate / 2

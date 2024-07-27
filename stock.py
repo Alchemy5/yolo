@@ -90,46 +90,48 @@ def summary(tckr):
 
 @click.command()
 @click.option('--tckr', help='The ticker symbol of the stock.')
-def value(tckr):
+def dcf(tckr):
     """
     Calculate intrinsic value for a stock based on dcf analysis.
     """
-    def calculate_present_value_of_cash_flows(free_cash_flow, growth_rate, discount_rate, years):
-        present_value = 0
-        for year in range(1, years + 1):
-            cash_flow = free_cash_flow * (1 + growth_rate) ** year
-            present_value += cash_flow / (1 + discount_rate) ** year
-        return present_value
-
-    def calculate_terminal_value(free_cash_flow, growth_rate, discount_rate):
-        terminal_value = free_cash_flow * (1 + growth_rate) / (discount_rate - growth_rate)
-        return terminal_value
-
     growth_rate = get_growth_rate(tckr)/100
     discount_rate = get_discount_rate(tckr)/100
     free_cash_flow = get_free_cash_flow(tckr)
-    terminal_growth_rate = estimate_terminal_growth_rate()
+    terminal_growth_rate = estimate_terminal_growth_rate(growth_rate)
     years = 10
     
-    # Calculate present value of cash flows for the first 10 years
-    present_value_of_cash_flows = calculate_present_value_of_cash_flows(free_cash_flow, growth_rate, discount_rate, years)
+    click.echo(f'Growth rate: {growth_rate}')
+    click.echo(f'Discount rate: {discount_rate}')
+    click.echo(f'Free cash flow: {free_cash_flow}')
+    click.echo(f'Terminal growth rate: {terminal_growth_rate}')
     
-    # Calculate terminal value and present value of the terminal value
-    terminal_value = calculate_terminal_value(free_cash_flow * (1 + growth_rate) ** years, terminal_growth_rate, discount_rate)
-    present_value_of_terminal_value = terminal_value / (1 + discount_rate) ** years
+    cash_flows = []
+    discounted_cash_flows = []
 
-    # Total intrinsic value
-    intrinsic_value = present_value_of_cash_flows + present_value_of_terminal_value
+    for year in range(1, years + 1):
+        next_cash_flow = free_cash_flow * ((1 + growth_rate) ** year)
+        cash_flows.append(next_cash_flow)
+    
+    for year in range(1, years + 1):
+        discounted_cash_flow = cash_flows[year - 1] / ((1 + discount_rate) ** year)
+        discounted_cash_flows.append(discounted_cash_flow)
+    
+    terminal_value = cash_flows[-1] * (1 + terminal_growth_rate) / (discount_rate - terminal_growth_rate)
 
+    discounted_terminal_value = terminal_value / ((1 + discount_rate) ** years)
+
+    intrinsic_value = sum(discounted_cash_flows) + discounted_terminal_value
+    
     click.echo(f'Intrinsic value of {tckr} is: ${intrinsic_value:.2f} billion')
     number_of_shares = yf.Ticker(tckr).info['sharesOutstanding']
+    click.echo(f'Number of shares: {number_of_shares}')
     click.echo(f'Intrinsic value per share: ${intrinsic_value / number_of_shares:.2f}')
 
 # add to group
 cli.add_command(income)
 cli.add_command(metrics)
 cli.add_command(summary)
-cli.add_command(value)
+cli.add_command(dcf)
 
 if __name__ == '__main__':
     cli()
